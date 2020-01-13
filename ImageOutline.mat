@@ -66,10 +66,10 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
-    - _Outline: 9.36
-    - _OutlineBlinkTime: 2.11
-    - _OutlineOffsetX: 0.58
-    - _OutlineOffsetY: 2.11
+    - _Outline: 5
+    - _OutlineBlinkTime: 3
+    - _OutlineOffsetX: 0
+    - _OutlineOffsetY: 0
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
