@@ -1,9 +1,10 @@
-﻿Shader "Unlit/SimpleMask"
+﻿Shader "Unlit/SimpleRoundedRectMask"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
 		_MaskRect("MaskRect",Vector) = (0.0,0.0,0.0,0.0)
+		_Radius("Radius", Float) = 10.0
     }
     SubShader
     {
@@ -38,7 +39,7 @@
             sampler2D _MainTex;
             float4 _MainTex_ST;
 			Vector _MaskRect;
-			bool _Flag;
+			float _Radius;
             v2f vert (appdata v)
             {
                 v2f o;
@@ -50,26 +51,32 @@
             }
 
             fixed4 frag (v2f i) : SV_Target
-            {
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
+			{
+				// sample the texture
+				fixed4 col = tex2D(_MainTex, i.uv);
 				col *= i.color;
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
-				//四角形マスク
-				/*if ((i.vertex.x > (_MaskRect.x - _MaskRect.z) && i.vertex.x < (_MaskRect.x + _MaskRect.z))
-					&&(i.vertex.y > (_MaskRect.y - _MaskRect.w) && i.vertex.y < (_MaskRect.y + _MaskRect.w))) {
-					col.rgb = 1.0;
-					col.a = 0.0;
-				}*/
+				// apply fog
+				UNITY_APPLY_FOG(i.fogCoord, col);
 
-				//楕円マスク
-				float x = pow(i.vertex.x - _MaskRect.x, 2) / pow(_MaskRect.z, 2);
-				float y = pow(i.vertex.y - _MaskRect.y, 2) / pow(_MaskRect.w, 2);
-				if (x + y < 1) {
+				//角丸四角形マスク
+				float r = _Radius;
+				//四角形領域
+				bool a = ((i.vertex.x > (_MaskRect.x - _MaskRect.z + r)) && (i.vertex.x < (_MaskRect.x + _MaskRect.z - r))
+					&& (i.vertex.y > (_MaskRect.y - _MaskRect.w)) && (i.vertex.y < (_MaskRect.y + _MaskRect.w)));
+				bool b = ((i.vertex.x > (_MaskRect.x - _MaskRect.z)) && (i.vertex.x < (_MaskRect.x + _MaskRect.z))
+					&& (i.vertex.y > (_MaskRect.y - _MaskRect.w + r)) && (i.vertex.y < (_MaskRect.y + _MaskRect.w - r)));
+
+				//四隅円領域
+				bool c = pow(i.vertex.x - (_MaskRect.x - _MaskRect.z + r), 2) + pow(i.vertex.y - (_MaskRect.y - _MaskRect.w + r),2) < pow(r,2);
+				bool d = pow(i.vertex.x - (_MaskRect.x + _MaskRect.z - r), 2) + pow(i.vertex.y - (_MaskRect.y - _MaskRect.w + r), 2) < pow(r, 2);
+				bool e = pow(i.vertex.x - (_MaskRect.x + _MaskRect.z - r), 2) + pow(i.vertex.y - (_MaskRect.y + _MaskRect.w - r), 2) < pow(r, 2);
+				bool f = pow(i.vertex.x - (_MaskRect.x - _MaskRect.z + r), 2) + pow(i.vertex.y - (_MaskRect.y + _MaskRect.w - r), 2) < pow(r, 2);
+
+				
+				if (a || b || c || d || e || f) {
 					col.a = 0.0;
 				}
-				
+
                 return col;
             }
             ENDCG
